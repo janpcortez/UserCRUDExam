@@ -1,28 +1,61 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Net.Http;
-using System.Net.Http.Json;
-using Users.API.Models;
+using UserCRUDExam.Models;
 
 namespace UserCRUDExam.Pages
 {
     public class UsersModel : PageModel
     {
-        private readonly IHttpClientFactory _clientFactory;
+        private readonly HttpClient _http;
 
-        public UsersModel(IHttpClientFactory clientFactory)
+        public UsersModel(HttpClient http)
         {
-            _clientFactory = clientFactory;
+            _http = http;
         }
 
-        public List<User> Users { get; private set; }
+        [BindProperty]
+        public User EditedUser { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync(int id)
         {
-            var client = _clientFactory.CreateClient("MyWebApi");
-            var response = await client.GetAsync("api/users");
-            response.EnsureSuccessStatusCode();
-            Users = await response.Content.ReadFromJsonAsync<List<User>>();
+            EditedUser = await GetUserAsync(id);
+            return Page();
+        }
+
+        private async Task<User> GetUserAsync(int id)
+        {
+            var result = await _http.GetFromJsonAsync<User>($"https://localhost:7291/api/users/{id}") ?? new User();
+            return result;
+        }
+
+        public async Task<IActionResult> OnPostAsync(User user)
+        {
+            var result = await _http.PutAsJsonAsync($"https://localhost:7291/api/users/{user.Id}", EditedUser);
+
+            if (result != null)
+            {
+                var response = await result.Content.ReadFromJsonAsync<User>();
+                EditedUser = response;
+                TempData["SuccessMessage"] = "User updated successfully!";
+            }
+
+            return RedirectToPage("/index");
+        }
+
+        public async Task<IActionResult> OnPostDeleteAsync(int id)
+        {
+            var result = await _http.DeleteAsync($"https://localhost:7291/api/users/{id}");
+
+            if (result.IsSuccessStatusCode)
+            {
+                TempData["DeletedMessage"] = "User deleted successfully";
+            }
+            else
+            {
+                TempData["DeletedError"] = "Failed to delete user";
+            }
+
+            return RedirectToPage("/index");
         }
     }
 }

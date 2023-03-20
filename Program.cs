@@ -1,7 +1,18 @@
+using Microsoft.EntityFrameworkCore;
+using UserCRUDExam.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddHttpClient();
+
+builder.Services.AddDbContext<UsersDbContext>(options =>
+options.UseSqlServer(builder.Configuration.GetConnectionString("UserCRUDExamDbConnectionString")));
+
 
 var app = builder.Build();
 
@@ -13,6 +24,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -21,5 +34,6 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.MapControllers();
 
 app.Run();
