@@ -1,0 +1,25 @@
+﻿@page
+@model UserCRUDExam.Pages.UsersModel
+@{
+    ViewData["Title"] = "My Web API";
+}
+<h1>@ViewData["Title"]</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model.Users)
+        {
+            <tr>
+                <td>@user.FirstName</td>
+                <td>@user.EmailAddress</td>
+                <td>@user.ContactNumber</td>
+            </tr>
+        }
+    </tbody>
+</table>
